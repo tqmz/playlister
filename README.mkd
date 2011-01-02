@@ -1,0 +1,5 @@
+# playlister
+
+`./mkplaylists` creates simple playlists for each main directory within your music library, which can be opened with players like [cmus].
+
+[cmus]: http://cmus.sourceforge.net/

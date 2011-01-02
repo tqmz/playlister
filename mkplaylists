@@ -1,0 +1,146 @@
+#!/usr/local/php/5.3.4/bin/php -q
+<?php
+
+/**
+ *  ./mkplaylists
+ *  creates playlists for players like `cmus`
+ *  one playlist for each main directory within `$path_to_music_library`
+ *  files in sub directories are included
+ *  see `README.md` for further details
+ *
+ *  @author    Tim Heil <https://github.com/smile>
+ */
+
+/**
+ * config
+ */
+$path_to_music_library = __DIR__; // change as needed, e. g. '/home/nick/Music'
+
+/**
+ * action
+ */
+$playlister = new Playlister($path_to_music_library);
+$playlister->save();
+
+/**
+ * Playlister – generate simple playlists out of directories
+ *
+ */
+class Playlister {
+
+  /**
+   * path for music, default path for playlists
+   *
+   * @var string
+   * @access protected
+   */
+  protected $path;
+
+  /**
+   * music file extensions to be accepted
+   *
+   * @var array
+   * @access protected
+   */
+  protected $extensions;
+
+  /**
+   * playlist names
+   *
+   * @var array
+   * @access protected
+   */
+  protected $playlists= array();
+
+  /**
+   * init settings, read playlist names and entries
+   *
+   * @param string $path
+   * @param string $extensions
+   * @access public
+   * @return void
+   */
+  public function __construct($path, $extensions = array('mp3', 'ogg', 'wma', 'flac')) {
+    $this->path = $path;
+    $this->extensions = $extensions;
+    $this->initPlaylists();
+    $this->readFiles();
+  }
+
+  /**
+   * save playlists
+   *
+   * @param string $path
+   * @param string $extension
+   * @access public
+   * @return void
+   */
+  public function save($path = '', $extension = 'pl') {
+    $path = empty($path) ? $this->path : $path;
+    foreach ($this->playlists as $name => $entries) {
+      $content = '';
+      foreach ($entries as $entry) {
+        $content .= $entry . "\n";
+      }
+      if (!empty($content)) {
+        $file = $path . DIRECTORY_SEPARATOR . $name . '.' . $extension;
+        if (!$handle = fopen($file, 'w')) {
+          throw new Exception('File not found: ' . $file);
+        }
+        if (!fwrite($handle, $content)) {
+          throw new Exception('File not writeable: ' . $file);
+        }
+      }
+    }
+  }
+
+  /**
+   * read first level's directory names
+   * playlists will be created out of those
+   *
+   * @access protected
+   * @return void
+   */
+  protected function initPlaylists() {
+    $directoryIterator = new DirectoryIterator($this->path);
+    foreach ($directoryIterator as $file) {
+      if ($file->isDir() && !$file->isDot()) {
+        $this->playlists[$file->getFilename()] = array();
+      }
+    }
+  }
+
+  /**
+   * recursively read all music files in each main directory
+   *
+   * @access protected
+   * @return void
+   */
+  protected function readFiles() {
+    foreach ($this->playlists as $name => $playlist) {
+      $rdi = new RecursiveDirectoryIterator($this->path . DIRECTORY_SEPARATOR . $name, FilesystemIterator::FOLLOW_SYMLINKS);
+      foreach (new RecursiveIteratorIterator($rdi) as $file) {
+        if ($file->isFile() && $this->isMusicFile($file)) {
+          $this->playlists[$name][] = $file->getPathname();
+        }
+      }
+    }
+  }
+
+  /**
+   * whether file extension belongs to allowed music file extensions
+   *
+   * @param SplFileInfo $file
+   * @access protected
+   * @return boolean
+   */
+  protected function isMusicFile(SplFileInfo $file) {
+    $name = $file->getFilename();
+    $extension = substr(strrchr($name, '.'), 1);
+
+    return in_array($extension, $this->extensions);
+  }
+
+}
+
+/* vim: set shiftwidth=2 softtabstop=2 tabstop=2 expandtab: */
