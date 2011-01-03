@@ -1,5 +1,58 @@
 # playlister
 
+## about
+
 `./mkplaylists` creates simple playlists for each main directory within your music library, which can be opened with players like [cmus].
 
+## get it
+
+PHP >= 5.3.0 is needed to run the script. Change the first line to the right path (e. g. `/usr/bin/php` or `/usr/bin/php5`).
+
+Checkout the repository directly into your music library (or just copy `mkplaylists` and `chmod u+x mkplaylists`). Alternatively, place the script wherever you like and change the `$path_to_music_library` within the config section accordingly.
+
+By default, playlists are stored in the same folder. Change `$path_for_playlist_storage` if needed.
+
+## why
+
+After some years with *iTunes* and *Banshee* I really had enough of super flat music libraries, touchpad scrolling and waiting times. Listening to music more and more felt like developing with powerful but bloated IDEs. I switched to [cmus].
+
+## how
+
+The root of my music library now contains some main folders, which can be genres or sources of music (like radio, friends, downloads).
+
+So it looks like this, just to give an example:
+
+    ./
+    ../
+    80s/
+    90s+Dance/
+    Chanson/
+    Classic/
+    __DOWNLOADS/
+    Drum+and+Bass/
+    Electro+Indie/
+    Flamenco/
+    Jazz/
+    mkplaylists*
+    __RADIO/
+    README.mkd
+    Rock/
+    Trip-Hop/
+    World/
+
+Each of those folders contains albums, compilations and single tracks as desired and will be represented by a playlist. After running `./mkplaylists` the newly generated playlists can be opened with [cmus] via `:load -p /path/to/your/playlist.pl` (found in playlist view: `3`).
+
+With a cronjob running the script all left to do is choosing the right playlist within [cmus] after placing the music to where it belongs and waiting a while.
+
+The script follows symlinks, so albums, compilations or single tracks can be placed to multiple playlists by creating symlinks. Remember to `find . -type l | grep Artist` before deleting files that might be referenced in other folders, and to backup single folders only with `cp -RL` or other dereference options with whichever tool you use. That in mind, sort your music directly on the file system without the headache of slow GUIs and limited playlist export options.
+
+Generated playlists are a good base for manual selections. Deleting some of the generated playlists tracks with `D` and `:save -p /path/to/your/playlist-finest.pl` in [cmus] is the easiest way to do that.
+
+[cmus] rocks. It's damn fast, supports [scrobbling on last.fm] and has [vim] keybindings.
+
+Using folders and this little script makes it dead easy to use [cmus], focus on music and keeping track of it.
+
 [cmus]: http://cmus.sourceforge.net/
+[scrobbling on last.fm]: https://github.com/hunner/cmus-audioscrobbler
+[vim]: http://www.vim.org/
+

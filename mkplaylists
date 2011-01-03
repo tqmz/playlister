@@ -15,12 +15,13 @@
  * config
  */
 $path_to_music_library = __DIR__; // change as needed, e. g. '/home/nick/Music'
+$path_for_playlist_storage = null; // change to whatever you like
 
 /**
  * action
  */
 $playlister = new Playlister($path_to_music_library);
-$playlister->save();
+$playlister->save($path_for_playlist_storage);
 
 /**
  * Playlister – generate simple playlists out of directories
